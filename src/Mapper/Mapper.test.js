@@ -54,3 +54,40 @@ test('Testing use mixing data', async (t) => {
     },
   });
 });
+
+test('Testing correct saving order result for function calls', async (t) => {
+  const mapper = new Mapper(METHODS);
+
+  const response = mapper
+    .load({ method: API.LOADER2, key: '123.4' })
+    .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 } });
+
+    const data = await response.values();
+  
+    t.deepEqual(data, {
+      123: {
+        a: 3,
+        b: 2,
+        4: 42,
+      },
+    });
+});
+
+test('Testing correct order result for function calls', async (t) => {
+  const mapper = new Mapper(METHODS);
+
+  const response = mapper
+    .load({ method: API.LOADER2, key: '123.4' })
+    .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 } })
+    .load({ method: API.LOADER1, key: '123', options: { a: 4, b: 5 } });
+
+    const data = await response.values();
+  
+    t.deepEqual(data, {
+      123: {
+        a: 5,
+        b: 4,
+        4: 42,
+      },
+    });
+});
