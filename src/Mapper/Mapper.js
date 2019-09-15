@@ -1,4 +1,4 @@
-import set from 'lodash-es/set';
+import objectPromiseAll from '../utils/objectPromiseAll';
 
 
 class Mapper {
@@ -12,10 +12,10 @@ class Mapper {
     }
   }
 
-  load({ method, key, options }) {
+  load({ method, key, options, use }) {
     this.queue[key] = {
       method: this.api[method],
-      options,
+      options, use,
     };
 
     return new Mapper(this.api, this.queue);
@@ -24,21 +24,15 @@ class Mapper {
   async values() {
     const keys = Object.keys(this.queue);
     
-    const asyncQueue = keys.map(key => {
+    const options = keys.reduce((result, key) => {
       const { method, options } = this.queue[key];
-      
-      return method(options);
-    });
-    
-    const responses = await Promise.all(asyncQueue);
 
-    return responses.reduce((result, response, index) => {
-      const responseName = keys[index] || '';
-
-      set(result, responseName, response);
+      result[key] = method(options);
 
       return result;
     }, {});
+
+    return await objectPromiseAll(options);
   }
 }
 
