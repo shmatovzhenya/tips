@@ -100,7 +100,7 @@ test('Testing correct order result for function calls', async (t) => {
 //     .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 }, use: { a: '123.4' } });
 
 //     const data = await response.values();
-  
+
 //     t.deepEqual(data, {
 //       123: {
 //         a: 3,

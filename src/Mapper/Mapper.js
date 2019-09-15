@@ -1,3 +1,7 @@
+import get from 'lodash-es/get';
+import set from 'lodash-es/set';
+
+import { loadValues } from './utils';
 import objectPromiseAll from '../utils/objectPromiseAll';
 
 
@@ -15,24 +19,64 @@ class Mapper {
   load({ method, key, options, use }) {
     this.queue[key] = {
       method: this.api[method],
-      options, use,
     };
+
+    if (options) {
+      this.queue[key].options = options;
+    }
+
+    if (use) {
+      this.queue[key].use = use;
+    }
 
     return new Mapper(this.api, this.queue);
   }
 
-  async values() {
-    const keys = Object.keys(this.queue);
-    
-    const options = keys.reduce((result, key) => {
-      const { method, options } = this.queue[key];
+  async _loadDataWithDependecies(queue) {
+    const keys = Object.keys(queue);
 
-      result[key] = method(options);
+    const { withDependencies, withoutDependencies } = keys.reduce((result, key) => {
+      const item = queue[key];
+      const field = 'use' in item ? 'withDependencies' : 'withoutDependencies';
+
+      result[field][key] = item;
+
+      return result;
+    }, { withDependencies: {}, withoutDependencies: {} });
+
+    const firstData = await this.loadValues(withoutDependencies);
+
+    const nextIndependedData = Object.keys(withDependencies).reduce((result, key) => {
+      const { use, options, method } = withDependencies[key];
+      const useKeys = Object.keys(use);
+
+      const computedOptions = useKeys.reduce((result, key) => {
+        const computedData = get(firstData, key, null);
+
+        if (computedData) {
+          set(result, key, computedData);
+        }
+
+        return result;
+      }, {});
 
       return result;
     }, {});
+  }
 
-    return await objectPromiseAll(options);
+  async values() {
+    const keys = Object.keys(this.queue);
+
+    const { withDependencies, withoutDependencies } = keys.reduce((result, key) => {
+      const item = this.queue[key];
+      const field = 'use' in item ? 'withDependencies' : 'withoutDependencies';
+
+      result[field][key] = item;
+
+      return result;
+    }, { withDependencies: {}, withoutDependencies: {} });
+
+    return await loadValues(withoutDependencies);
   }
 }
 
