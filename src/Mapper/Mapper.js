@@ -1,3 +1,6 @@
+import set from 'lodash-es/set';
+
+
 class Mapper {
   queue = {};
 
@@ -30,9 +33,9 @@ class Mapper {
     const responses = await Promise.all(asyncQueue);
 
     return responses.reduce((result, response, index) => {
-      const responseName = keys[index];
+      const responseName = keys[index] || '';
 
-      result[responseName] = response;
+      set(result, responseName, response);
 
       return result;
     }, {});

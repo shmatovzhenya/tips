@@ -36,3 +36,21 @@ test('Testing async get values', async (t) => {
     345: 42,
   });
 });
+
+test('Testing use mixing data', async (t) => {
+  const mapper = new Mapper(METHODS);
+
+  const response = mapper
+    .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 } })
+    .load({ method: API.LOADER2, key: '123.4' });
+
+  const data = await response.values();
+
+  t.deepEqual(data, {
+    123: {
+      a: 3,
+      b: 2,
+      4: 42,
+    },
+  });
+});
