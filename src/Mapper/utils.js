@@ -15,6 +15,29 @@ const loadValues = async (queue) => {
   return await objectPromiseAll(options);
 };
 
+const splitDataByDepends = (queue) => {
+  const keys = Object.keys(queue);
+  
+  const { withDependencies, withoutDependencies } = keys.reduce((result, key) => {
+    const item = queue[key];
+    const field = 'use' in item ? 'withDependencies' : 'withoutDependencies';
+
+    if (!result[field]) {
+      result[field] = {};
+    }
+
+    result[field][key] = item;
+
+    return result;
+  }, {});
+
+  return {
+    withDependencies,
+    withoutDependencies,
+  };
+};
+
 export {
   loadValues,
+  splitDataByDepends,
 };

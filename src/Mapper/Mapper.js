@@ -1,8 +1,7 @@
 import get from 'lodash-es/get';
 import set from 'lodash-es/set';
 
-import { loadValues } from './utils';
-import objectPromiseAll from '../utils/objectPromiseAll';
+import { loadValues, splitDataByDepends } from './utils';
 
 
 class Mapper {
@@ -35,16 +34,8 @@ class Mapper {
   async _loadDataWithDependecies(queue) {
     const keys = Object.keys(queue);
 
-    const { withDependencies, withoutDependencies } = keys.reduce((result, key) => {
-      const item = queue[key];
-      const field = 'use' in item ? 'withDependencies' : 'withoutDependencies';
-
-      result[field][key] = item;
-
-      return result;
-    }, { withDependencies: {}, withoutDependencies: {} });
-
-    const firstData = await this.loadValues(withoutDependencies);
+    const { withDependencies, withoutDependencies } = splitDataByDepends(queue);
+    const firstData = await loadValues(withoutDependencies);
 
     const nextIndependedData = Object.keys(withDependencies).reduce((result, key) => {
       const { use, options, method } = withDependencies[key];
@@ -66,15 +57,7 @@ class Mapper {
 
   async values() {
     const keys = Object.keys(this.queue);
-
-    const { withDependencies, withoutDependencies } = keys.reduce((result, key) => {
-      const item = this.queue[key];
-      const field = 'use' in item ? 'withDependencies' : 'withoutDependencies';
-
-      result[field][key] = item;
-
-      return result;
-    }, { withDependencies: {}, withoutDependencies: {} });
+    const { withDependencies, withoutDependencies } = splitDataByDepends(this.queue);
 
     return await loadValues(withoutDependencies);
   }

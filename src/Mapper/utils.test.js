@@ -1,6 +1,6 @@
 import test from 'ava';
 
-import { loadValues } from './utils';
+import { loadValues, splitDataByDepends } from './utils';
 
 
 test('Testing load values util', async (t) => {
@@ -19,5 +19,31 @@ test('Testing load values util', async (t) => {
   t.deepEqual(data, {
     123: { a: 3, b: 2 },
     345: 42,
+  });
+});
+
+test('Test splitting data by depends', async (t) => {
+  const fixture = {
+    345: {
+    }, 
+    123: {
+      use: { a: 345 },
+      options: { a: 2, b: 3 },
+    },
+  };
+
+  const { withDependencies, withoutDependencies } = splitDataByDepends(fixture);
+
+  t.deepEqual({ withDependencies, withoutDependencies }, {
+    withDependencies: {
+      123: {
+        use: { a: 345 },
+        options: { a: 2, b: 3 },
+      },
+    },
+    withoutDependencies: {
+      345: {
+      },
+    },
   });
 });
