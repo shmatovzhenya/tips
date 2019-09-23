@@ -92,20 +92,20 @@ test('Testing correct order result for function calls', async (t) => {
     });
 });
 
-// test('Testing using previous calls result', async (t) => {
-//   const mapper = new Mapper(METHODS);
+test('Testing using previous calls result', async (t) => {
+  const mapper = new Mapper(METHODS);
 
-//   const response = mapper
-//     .load({ method: API.LOADER2, key: '123.4' })
-//     .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 }, use: { a: '123.4' } });
+  const response = mapper
+    .load({ method: API.LOADER2, key: '123.4' })
+    .load({ method: API.LOADER1, key: '123', options: { a: 2, b: 3 }, use: { a: '123.4' } });
 
-//     const data = await response.values();
+    const data = await response.values();
 
-//     t.deepEqual(data, {
-//       123: {
-//         a: 3,
-//         b: 42,
-//         4: 42,
-//       },
-//     });
-// });
+    t.deepEqual(data, {
+      123: {
+        a: 3,
+        b: 42,
+        4: 42,
+      },
+    });
+});

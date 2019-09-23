@@ -1,5 +1,4 @@
 import get from 'lodash-es/get';
-import set from 'lodash-es/set';
 
 import { loadValues, splitDataByDepends } from './utils';
 
@@ -32,34 +31,52 @@ class Mapper {
   }
 
   async _loadDataWithDependecies(queue) {
-    const keys = Object.keys(queue);
-
     const { withDependencies, withoutDependencies } = splitDataByDepends(queue);
     const firstData = await loadValues(withoutDependencies);
 
-    const nextIndependedData = Object.keys(withDependencies).reduce((result, key) => {
+    if (!withDependencies || Object.keys(withDependencies).length === 0) {
+      return firstData;
+    }
+
+    const nextQueue = Object.keys(withDependencies).reduce((result, key) => {
       const { use, options, method } = withDependencies[key];
       const useKeys = Object.keys(use);
+      const nextOptions = {...options};
+      const nextUse = {};
 
-      const computedOptions = useKeys.reduce((result, key) => {
-        const computedData = get(firstData, key, null);
+      useKeys.forEach((key) => {
+        const path = use[key];
+        const computedData = get(firstData, path, null);
 
-        if (computedData) {
-          set(result, key, computedData);
+        if (!computedData) {
+          nextUse[key] = use[key];
+
+          return;
         }
 
-        return result;
-      }, {});
+        nextOptions[key] = computedData;
+      });
+
+      result[key] = { method };
+
+      if (nextUse && Object.keys(nextUse).length > 0) {
+        result[key].use = nextUse;
+      }
+
+      if (nextOptions && Object.keys(nextOptions).length > 0) {
+        result[key].options = nextOptions;
+      }
 
       return result;
     }, {});
+
+    const mergedQueue = {...withoutDependencies, ...nextQueue};
+    
+    return await this._loadDataWithDependecies(mergedQueue);
   }
 
   async values() {
-    const keys = Object.keys(this.queue);
-    const { withDependencies, withoutDependencies } = splitDataByDepends(this.queue);
-
-    return await loadValues(withoutDependencies);
+    return await this._loadDataWithDependecies(this.queue);
   }
 }
 
