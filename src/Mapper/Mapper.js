@@ -1,4 +1,5 @@
 import get from 'lodash-es/get';
+import omit from 'lodash-es/omit';
 
 import { loadValues, splitDataByDepends } from './utils';
 
@@ -30,12 +31,14 @@ class Mapper {
     return new Mapper(this.api, this.queue);
   }
 
-  async _loadDataWithDependecies(queue) {
+  async _loadDataWithDependecies(queue, result = {}) {
     const { withDependencies, withoutDependencies } = splitDataByDepends(queue);
-    const firstData = await loadValues(withoutDependencies);
+    const unLoadedDataWithoudDeps = omit(withoutDependencies, Object.keys(result));
+    const firstData = await loadValues(unLoadedDataWithoudDeps);
+    const processedData = {...result, ...firstData};
 
     if (!withDependencies || Object.keys(withDependencies).length === 0) {
-      return firstData;
+      return processedData;
     }
 
     const nextQueue = Object.keys(withDependencies).reduce((result, key) => {
@@ -46,7 +49,7 @@ class Mapper {
 
       useKeys.forEach((key) => {
         const path = use[key];
-        const computedData = get(firstData, path, null);
+        const computedData = get(processedData, path, null);
 
         if (!computedData) {
           nextUse[key] = use[key];
