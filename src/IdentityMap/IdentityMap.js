@@ -1,20 +1,16 @@
-const cache = new Map();
+import InMemoryStrategy from './strategies/InMemoryStrategy';
+
+
+const defaultStrategy = new InMemoryStrategy();
 
 class IdentityMap {
-  constructor(method) {
-    if (!cache.has(method)) {
-      cache.set(method, {});
-    }
-
+  constructor(method, strategy = defaultStrategy) {
     return options => {
-      const methodCalls = cache.get(method);
-      const serialized = JSON.stringify(options);
-
-      if (!(serialized in methodCalls)) {
-        methodCalls[serialized] = method(options);
+      if (!strategy.has(method, options)) {
+        strategy.set(method, options);
       }
 
-      return methodCalls[serialized];
+      return strategy.get(method, options);
     };
   }
 }
