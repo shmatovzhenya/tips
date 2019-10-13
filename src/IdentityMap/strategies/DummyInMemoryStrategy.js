@@ -1,6 +1,6 @@
 const cache = new Map();
 
-class InMemoryStrategy {
+class DummyInMemoryStrategy {
   constructor() {}
 
   set(method, parameters) {
@@ -26,4 +26,4 @@ class InMemoryStrategy {
   }
 }
 
-export default InMemoryStrategy;
+export default DummyInMemoryStrategy;

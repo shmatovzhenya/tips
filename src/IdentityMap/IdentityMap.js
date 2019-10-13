@@ -1,7 +1,7 @@
-import InMemoryStrategy from './strategies/InMemoryStrategy';
+import DummyInMemoryStrategy from './strategies/DummyInMemoryStrategy';
 
 
-const defaultStrategy = new InMemoryStrategy();
+const defaultStrategy = new DummyInMemoryStrategy();
 
 class IdentityMap {
   constructor(method, strategy = defaultStrategy) {
