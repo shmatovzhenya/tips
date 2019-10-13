@@ -10,6 +10,14 @@ const compute = async ({ method, options, update, computed }, result = {}) => {
     data = await method(computedValue);
   } else if (!computed || isEmptyObject(computed)) {
     data = await method(options);
+  } else if (computed && !isEmptyObject(computed)) {
+    const parameters = {...options};
+
+    for (let [key, value] of Object.entries(computed)) {
+      parameters[key] = result[value];
+    }
+
+    data = await method(parameters);
   }
 
   if (!isEmptyObject(update)) {
