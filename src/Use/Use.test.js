@@ -43,21 +43,21 @@ test('Testing correct update data in nesting instances', async (t) => {
   t.deepEqual({ a: 3, b: 42 }, result);
 });
 
-// test('Testing use previous computed value', async (t) => {
-//   const nestedUse = new Use({
-//     method: a => Promise.resolve(-a),
-//     computed: 'b',
-//   });
+test('Testing use previous computed value', async (t) => {
+  const nestedUse = new Use({
+    method: a => Promise.resolve(-a),
+    computed: 'b',
+  });
 
-//   const use = new Use({
-//     method: ({ a, b }) => Promise.resolve({ a: b, b: a }),
-//     options: { a: 2, b: 3 },
-//     update: {
-//       b: nestedUse,
-//     },
-//   });
+  const use = new Use({
+    method: ({ a, b }) => Promise.resolve({ a: b, b: a }),
+    options: { a: 2, b: 3 },
+    update: {
+      b: nestedUse,
+    },
+  });
 
-//   const result = await use.getResult();
+  const result = await use.getResult();
 
-//   t.deepEqual({ a: 3, b: -2 }, result);
-// });
+  t.deepEqual({ a: 3, b: -2 }, result);
+});

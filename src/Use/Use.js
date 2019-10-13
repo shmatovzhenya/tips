@@ -4,14 +4,12 @@ import isEmptyObject from '../utils/isEmptyObject';
 const compute = async ({ method, options, update, computed }, result = {}) => {
   let data = {};
 
-  if (!computed || isEmptyObject(computed)) {
-    data = await method(options);
-  }
-
-  if (typeof computed === 'string') {
+  if (typeof computed === 'string' || computed instanceof String) {
     const computedValue = result[computed];
 
     data = await method(computedValue);
+  } else if (!computed || isEmptyObject(computed)) {
+    data = await method(options);
   }
 
   if (!isEmptyObject(update)) {
@@ -23,9 +21,6 @@ const compute = async ({ method, options, update, computed }, result = {}) => {
   return data;
 };
 
-/**
- * Data transfer object for Data Mapper.
- */
 class Use {
   #method = undefined;
   #options = undefined;
@@ -50,6 +45,10 @@ class Use {
 
     if (!isEmptyObject(fallback)) {
       this.#fallback = fallback;
+    }
+
+    if (computed) {
+      this.#computed = computed;
     }
 
     Object.freeze(this);
